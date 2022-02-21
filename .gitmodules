@@ -1,0 +1,3 @@
+[submodule "utils/yolo5-face"]
+	path = utils/yolo5-face
+	url = https://github.com/deepcam-cn/yolov5-face.git

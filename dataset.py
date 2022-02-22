@@ -1,11 +1,15 @@
 import os
 import pandas as pd
+import splitfolders
+from keras.preprocessing.image import ImageDataGenerator, load_img
 
 import detect_face
 
 raw_data = "data/uncroped_data/"
 processed_data = "data/processed_data/"
 weights = "models/yolov5n-face.pt"
+train_data = "data/train"
+test_data = "data/test"
 
 
 # Information on number of images in each folder
@@ -61,7 +65,54 @@ def test_process_data(image_name):
 	detect_face.import_model(weights)
 	detect_face.run_detect_face(image_name, 80, "result.jpg")
 
+
 # splits the processed data into training and test sets
+def split_training_test(path):
+	splitfolders.ratio(path, output="data/",
+					   seed=1337, ratio=(.8, .2), group_prefix=None, move=False)
+
+	# enables oversampling of imbalanced datasets, works only with --fixed
+	# splitfolders.ratio(path, output="data/",
+	# 				   seed=1337, ratio=(.8, .2), group_prefix=None, move=False, oversample=True)
+
+	# Change folder name of val to test
+	os.rename("data/val", "data/test")
+
+
+def data_loader():
+	train_datagen = ImageDataGenerator(horizontal_flip=True,
+									   validation_split=0.2)
+
+	training_set = train_datagen.flow_from_directory(train_data,
+													 batch_size=64,
+													 target_size=(48, 48),
+													 shuffle=True,
+													 color_mode='grayscale',
+													 class_mode='categorical',
+													 subset='training')
+
+	validation_set = train_datagen.flow_from_directory(train_data,
+													   batch_size=64,
+													   target_size=(48, 48),
+													   shuffle=True,
+													   color_mode='grayscale',
+													   class_mode='categorical',
+													   subset='validation')
+
+	test_datagen = ImageDataGenerator(horizontal_flip=True)
+
+	test_set = test_datagen.flow_from_directory(test_data,
+												batch_size=64,
+												target_size=(48, 48),
+												shuffle=True,
+												color_mode='grayscale',
+												class_mode='categorical')
+
+	print(training_set.class_indices)
+
+	return training_set, validation_set, test_set
+
+# data_loader()
 
 # modify training set to be split into training and validations set
 

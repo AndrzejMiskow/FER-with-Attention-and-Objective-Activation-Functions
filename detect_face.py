@@ -69,17 +69,17 @@ def show_results(img, xywh, conf, landmarks, class_num, face_size):
 
     # No need to draw boxes on croped faces, landmark feature may be used later on
 
-    # cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), thickness=tl, lineType=cv2.LINE_AA)
-    # clors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (0, 255, 255)]
+    cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), thickness=tl, lineType=cv2.LINE_AA)
+    clors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (0, 255, 255)]
     #
     # # Landmarks of the face unnecessary but may be useful for training the neural network
-    # for i in range(5):
-    #     point_x = int(landmarks[2 * i] * w)
-    #     point_y = int(landmarks[2 * i + 1] * h)
-    #     cv2.circle(img, (point_x, point_y), tl + 1, clors[i], -1)
-    # tf = max(tl - 1, 1)  # font thickness
-    # label = str(conf)[:5]  # confidence rating
-    # cv2.putText(img, label, (x1, y1 - 2), 0, tl / 3, [225, 255, 255], thickness=tf, lineType=cv2.LINE_AA)
+    for i in range(5):
+        point_x = int(landmarks[2 * i] * w)
+        point_y = int(landmarks[2 * i + 1] * h)
+        cv2.circle(img, (point_x, point_y), tl + 1, clors[i], -1)
+    tf = max(tl - 1, 1)  # font thickness
+    label = str(conf)[:5]  # confidence rating
+    cv2.putText(img, label, (x1, y1 - 2), 0, tl / 3, [225, 255, 255], thickness=tf, lineType=cv2.LINE_AA)
     #
     return img, croped_face
 
@@ -145,8 +145,9 @@ def detect_one(model, image_path, device, face_size, output_path):
                 class_num = det[j, 15].cpu().numpy()
 
                 # Output for each face box
-                orgimg, cropped_face = show_results(orgimg, xywh, conf, landmarks, class_num, face_size)
-                cv2.imwrite(output_path, cropped_face)
+                if conf > 0.5:
+                    orgimg, cropped_face = show_results(orgimg, xywh, conf, landmarks, class_num, face_size)
+                    cv2.imwrite(output_path, cropped_face)
 
     # test a single output
     cv2.imwrite('result.jpg', orgimg)

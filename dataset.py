@@ -1,3 +1,4 @@
+import argparse
 import os
 import pandas as pd
 import splitfolders
@@ -8,8 +9,8 @@ import detect_face
 raw_data = "data/uncroped_data/"
 processed_data = "data/processed_data/"
 weights = "models/yolov5n-face.pt"
-train_data = "data/train"
-test_data = "data/test"
+train_data = "data/train/"
+test_data = "data/test/"
 
 
 # Information on number of images in each folder
@@ -31,12 +32,6 @@ def clear_folder(path):
 		for image in os.listdir(category):
 			file_path = os.path.join(category, image)
 			os.remove(file_path)
-
-
-# function to clear all the data folders
-def clear_data_folders():
-	clear_folder(raw_data)
-	clear_folder(processed_data)
 
 
 # function to crop faces out of images
@@ -79,6 +74,7 @@ def split_training_test(path):
 	os.rename("data/val", "data/test")
 
 
+# data loader for the train , validation and test datasets
 def data_loader():
 	train_datagen = ImageDataGenerator(horizontal_flip=True,
 									   validation_split=0.2)
@@ -112,21 +108,34 @@ def data_loader():
 
 	return training_set, validation_set, test_set
 
-# data_loader()
 
-# modify training set to be split into training and validations set
+if __name__ == '__main__':
+	parser = argparse.ArgumentParser(description="Configuration of setup and training process")
+	parser.add_argument('-s', '--setup', type=bool, help='setup the dataset for the first time')
 
-#
+	parser.add_argument('-d', '--display_data', type=bool,
+						help='display contents of the data folders')
 
+	parser.add_argument('-c', '--clear_data', type=str, nargs='+', help='clear specified folders')
 
-# clear_data_folders()
-# number_of_images(raw_data, 'raw_data')
-# clear_folder(processed_data)
+	parser.add_argument('-t', '--test', type=str, help='test image processing on one image with specified path')
+	args = parser.parse_args()
 
-# show the number of images in data folders
-# print(number_of_images(raw_data, "raw data"))
-# print(number_of_images(processed_data, "processed data"))
+	if args.setup:
+		number_of_images(raw_data, 'raw_data')
+		process_data(raw_data)
+		split_training_test(processed_data)
 
-# process_data(raw_data)
+	if args.display_data:
+		print(number_of_images(raw_data, "raw data"))
+		print(number_of_images(processed_data, "processed data"))
+		print(number_of_images(train_data, "training_data"))
+		print(number_of_images(test_data, "test_data"))
 
-# test_process_data("test.jpeg")
+	if args.clear_data:
+		for path in args.clear_data:
+			clear_folder(path)
+
+	if args.test:
+		test_process_data(args.test)
+

@@ -98,128 +98,16 @@ def model_vgg16(img_height=48,
 
 
 def model_ResNet50_V1(
+		model="ResNet50",
 		img_height=48,
 		img_width=48,
 		a_output='softmax',
 		pooling='avg',
 		grayscale=True,
 		num_classes=7):
-	"""Base ResNet50 V1 Model
+	"""Function that is able to return different ResNet V1 Models
        Args:
-          img_height: integer,default '48', input image height
-          img_width: integer,default '48', input image width
-          a_output: string, default 'softmax', output activation function
-          pooling: string,default 'avg', pooling used for the final layer either 'avg' or 'max'
-          grayscale: bool, states when the input tensor is RGB or Grayscale
-          num_classes: integer, default 7,states the number of classes
-        Returns:
-          Output A `keras.Model` instance.
-    """
-	# Input
-	if grayscale:
-		input_img = Input(shape=(img_height, img_width, 1), name="img")
-		batch_axis = 1
-	else:
-		input_img = Input(shape=(img_height, img_width, 3), name="img")
-		input_img = layers.experimental.preprocessing.Rescaling(1. / 255)(input_img)
-		batch_axis = 3
-
-	# Data Augmentation
-	input_img = data_augmentation(input_img)
-
-	# Conv_1
-	x = layers.ZeroPadding2D(padding=((3, 3), (3, 3)), name='Conv1_Pad')(input_img)
-	x = layers.Conv2D(64, 7, strides=2, name='Conv1')(x)
-	x = layers.BatchNormalization(axis=batch_axis, epsilon=1.001e-5, name='Conv1_BN')(x)
-	x = layers.Activation('relu', name='Conv1_relu')(x)
-
-	x = layers.ZeroPadding2D(padding=((1, 1), (1, 1)), name='MaxPool2D_1_Pad')(x)
-	x = layers.MaxPooling2D(3, strides=2, name='MaxPool2D_1')(x)
-
-	# Residual Stacked Blocks
-	x = group_residuals_v1(x, [64, 64, 256], 3, stride1=1, name='Conv2')
-	x = group_residuals_v1(x, [128, 128, 512], 4, name='Conv3')
-	x = group_residuals_v1(x, [256, 256, 1024], 6, name='Conv4')
-	x = group_residuals_v1(x, [512, 512, 2048], 3, name='Conv5')
-
-	# Output
-	if pooling == 'avg':
-		x = layers.GlobalAveragePooling2D(name='AvgPool2D_Final')(x)
-	else:
-		x = layers.GlobalMaxPooling2D(name='MaxPool2D_Final')(x)
-
-	output = layers.Dense(num_classes, activation=a_output, name='DenseFinal')(x)
-
-	model = Model(inputs=input_img, outputs=output, name="ResNet50_V1")
-	return model
-
-
-def model_ResNet18_V1(
-		img_height=48,
-		img_width=48,
-		a_output='softmax',
-		pooling='avg',
-		grayscale=True,
-		num_classes=7):
-	"""Base ResNet18 V1 Model
-       Args:
-          img_height: integer,default '48', input image height
-          img_width: integer,default '48', input image width
-          a_output: string, default 'softmax', output activation function
-          pooling: string,default 'avg', pooling used for the final layer either 'avg' or 'max'
-          grayscale: bool, states when the input tensor is RGB or Grayscale
-          num_classes: integer, default 7,states the number of classes
-        Returns:
-          Output A `keras.Model` instance.
-    """
-	# Input
-	if grayscale:
-		input_img = Input(shape=(img_height, img_width, 1), name="img")
-		batch_axis = 1
-	else:
-		input_img = Input(shape=(img_height, img_width, 3), name="img")
-		input_img = layers.experimental.preprocessing.Rescaling(1. / 255)(input_img)
-		batch_axis = 3
-
-	# Data Augmentation
-	input_img = data_augmentation(input_img)
-
-	# Conv_1
-	x = layers.ZeroPadding2D(padding=((3, 3), (3, 3)), name='Conv1_Pad')(input_img)
-	x = layers.Conv2D(64, 7, strides=2, name='Conv1')(x)
-	x = layers.BatchNormalization(axis=batch_axis, epsilon=1.001e-5, name='Conv1_BN')(x)
-	x = layers.Activation('relu', name='Conv1_relu')(x)
-
-	x = layers.ZeroPadding2D(padding=((1, 1), (1, 1)), name='MaxPool2D_1_Pad')(x)
-	x = layers.MaxPooling2D(3, strides=2, name='MaxPool2D_1')(x)
-
-	# Residual Stacked Blocks
-	x = group_residuals_v1(x, [64, 64, 256], 2, stride1=1, name='Conv2', grayscale=grayscale)
-	x = group_residuals_v1(x, [128, 128, 512], 2, name='Conv3', grayscale=grayscale)
-	x = group_residuals_v1(x, [256, 256, 1024], 2, name='Conv4', grayscale=grayscale)
-	x = group_residuals_v1(x, [512, 512, 2048], 2, name='Conv5', grayscale=grayscale)
-
-	# Output
-	if pooling == 'avg':
-		x = layers.GlobalAveragePooling2D(name='AvgPool2D_Final')(x)
-	else:
-		x = layers.GlobalMaxPooling2D(name='MaxPool2D_Final')(x)
-
-	output = layers.Dense(num_classes, activation=a_output, name='DenseFinal')(x)
-
-	model = Model(inputs=input_img, outputs=output, name="ResNet50_V1")
-	return model
-
-
-def model_ResNet50_V2(
-		img_height=48,
-		img_width=48,
-		a_output='softmax',
-		pooling='avg',
-		grayscale=True,
-		num_classes=7):
-	"""Base ResNet50 V2 model
-       Args:
+       	  model: string, default 'ResNet50', select which ResNet model to use ResNet50 , ResNet101 or ResNet152
           img_height: integer,default '48', input image height
           img_width: integer,default '48', input image width
           a_output: string, default 'softmax', output activation function
@@ -237,6 +125,78 @@ def model_ResNet50_V2(
 		input_img = Input(shape=(img_height, img_width, 3), name="img")
 		input_img = layers.experimental.preprocessing.Rescaling(1. / 255)(input_img)
 
+	if model == "ResNet50":
+		num_blocks = [3, 4, 6, 3]
+	elif model == "ResNet101":
+		num_blocks = [3, 4, 23, 3]
+	elif model == "ResNet152":
+		num_blocks = [3, 8, 36, 3]
+
+	# Data Augmentation
+	input_img = data_augmentation(input_img)
+
+	# Conv_1
+	x = layers.ZeroPadding2D(padding=((3, 3), (3, 3)), name='Conv1_Pad')(input_img)
+	x = layers.Conv2D(64, 7, strides=2, name='Conv1')(x)
+	x = layers.BatchNormalization(axis=batch_axis, epsilon=1.001e-5, name='Conv1_BN')(x)
+	x = layers.Activation('relu', name='Conv1_relu')(x)
+
+	x = layers.ZeroPadding2D(padding=((1, 1), (1, 1)), name='MaxPool2D_1_Pad')(x)
+	x = layers.MaxPooling2D(3, strides=2, name='MaxPool2D_1')(x)
+
+	# Residual Stacked Blocks
+	x = group_residuals_v1(x, [64, 64, 256], num_blocks[0], stride1=1, name='Conv2')
+	x = group_residuals_v1(x, [128, 128, 512], num_blocks[1], name='Conv3')
+	x = group_residuals_v1(x, [256, 256, 1024], num_blocks[2], name='Conv4')
+	x = group_residuals_v1(x, [512, 512, 2048], num_blocks[3], name='Conv5')
+
+	# Output
+	if pooling == 'avg':
+		x = layers.GlobalAveragePooling2D(name='AvgPool2D_Final')(x)
+	else:
+		x = layers.GlobalMaxPooling2D(name='MaxPool2D_Final')(x)
+
+	output = layers.Dense(num_classes, activation=a_output, name='DenseFinal')(x)
+
+	model = Model(inputs=input_img, outputs=output, name="ResNet50_V1")
+	return model
+
+
+def model_ResNet_V2(
+		model="ResNet50",
+		img_height=48,
+		img_width=48,
+		a_output='softmax',
+		pooling='avg',
+		grayscale=True,
+		num_classes=7):
+	"""Function that is able to return diffrent Resnet V2 models
+       Args:
+       	  model: string, default 'ResNet50', select which ResNet model to use ResNet50 , ResNet101 or ResNet152
+          img_height: integer,default '48', input image height
+          img_width: integer,default '48', input image width
+          a_output: string, default 'softmax', output activation function
+          pooling: string,default 'avg', pooling used for the final layer either 'avg' or 'max'
+          grayscale: bool, states when the input tensor is RGB or Grayscale
+          num_classes: integer, default 7,states the number of classes
+        Returns:
+          Output A `keras.Model` instance.
+    """
+	# Input
+	batch_axis = 1
+	if grayscale:
+		input_img = Input(shape=(img_height, img_width, 1), name="img")
+	else:
+		input_img = Input(shape=(img_height, img_width, 3), name="img")
+		input_img = layers.experimental.preprocessing.Rescaling(1. / 255)(input_img)
+
+	if model == "ResNet50":
+		num_blocks = [3, 4, 6, 3]
+	elif model == "ResNet101":
+		num_blocks = [3, 4, 23, 3]
+	elif model == "ResNet152":
+		num_blocks = [3, 8, 36, 3]
+
 	input_img = data_augmentation(input_img)
 
 	# Conv_1
@@ -247,10 +207,10 @@ def model_ResNet50_V2(
 	x = layers.MaxPooling2D(3, strides=2, name='MaxPool2D_1')(x)
 
 	# Residual Stacked Blocks
-	x = group_residuals_v2(x, [64, 64, 256], 3, stride1=2, name='Conv2')
-	x = group_residuals_v2(x, [128, 128, 512], 4, stride1=2, name='Conv3')
-	x = group_residuals_v2(x, [256, 256, 1024], 6, stride1=2, name='Conv4')
-	x = group_residuals_v2(x, [512, 512, 2048], 3, stride1=1, name='Conv5')
+	x = group_residuals_v2(x, [64, 64, 256], num_blocks[0], stride1=2, name='Conv2')
+	x = group_residuals_v2(x, [128, 128, 512], num_blocks[1], stride1=2, name='Conv3')
+	x = group_residuals_v2(x, [256, 256, 1024], num_blocks[2], stride1=2, name='Conv4')
+	x = group_residuals_v2(x, [512, 512, 2048], num_blocks[3], stride1=1, name='Conv5')
 
 	# Due to pre-activation we need to apply activation to last conv block
 	x = layers.BatchNormalization(axis=batch_axis, epsilon=1.001e-5, name='Final_BN')(x)
@@ -265,62 +225,4 @@ def model_ResNet50_V2(
 	output = layers.Dense(num_classes, activation=a_output, name='DenseFinal')(x)
 
 	model = Model(inputs=input_img, outputs=output, name="ResNet50_V2")
-	return model
-
-
-def model_DenseNet121(
-		img_height=48,
-		img_width=48,
-		a_output='softmax',
-		pooling='avg',
-		grayscale=True,
-		num_classes=7):
-	"""Base DenseNet121 Model
-       Args:
-          img_height: integer,default '48', input image height
-          img_width: integer,default '48', input image width
-          a_output: string, default 'softmax', output activation function
-          pooling: string,default 'avg', pooling used for the final layer either 'avg' or 'max'
-          grayscale: bool, states when the input tensor is RGB or Grayscale
-          num_classes: integer, default 7,states the number of classes
-        Returns:
-          Output A `keras.Model` instance.
-    """
-	# Input
-	if grayscale:
-		input_img = Input(shape=(img_height, img_width, 1), name="img")
-		batch_axis = 1
-	else:
-		input_img = Input(shape=(img_height, img_width, 3), name="img")
-		input_img = layers.experimental.preprocessing.Rescaling(1. / 255)(input_img)
-		batch_axis = 3
-
-	# Data Augmentation
-	# input_img = data_augmentation(input_img)
-
-	x = layers.ZeroPadding2D(padding=((3, 3), (3, 3)), name='Conv1_Pad')(input_img)
-	x = layers.Conv2D(64, 7, strides=2, use_bias=False, name='Conv1')(x)
-	x = layers.BatchNormalization(axis=batch_axis, epsilon=1.001e-5, name='Final_BN')(x)
-	x = layers.Activation('relu', name='Conv1_Relu')(x)
-
-	x = layers.ZeroPadding2D(padding=((1, 1), (1, 1)))(x)
-	x = layers.MaxPooling2D(3, strides=2, name='Conv1_MaxPool2D')(x)
-
-	x = dense_block(x, 6, name='Conv2', grayscale=grayscale)
-	x = dense_connection(x, 0.5, name='Conv2_MaxPool2D')
-	x = dense_block(x, 12, name='Conv3', grayscale=grayscale)
-	x = dense_connection(x, 0.5, name='Conv3_MaxPool2D')
-	x = dense_block(x, 24, name='Conv4', grayscale=grayscale)
-	x = dense_connection(x, 0.5, name='Conv4_MaxPool2D')
-	x = dense_block(x, 16, name='Conv5', grayscale=grayscale)
-
-	# Output
-	if pooling == 'avg':
-		x = layers.GlobalAveragePooling2D(name='AvgPool2D_Final')(x)
-	else:
-		x = layers.GlobalMaxPooling2D(name='MaxPool2D_Final')(x)
-
-	output = layers.Dense(num_classes, activation=a_output, name='DenseFinal')(x)
-
-	model = Model(inputs=input_img, outputs=output, name="DenseNet121")
 	return model

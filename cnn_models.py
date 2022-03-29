@@ -35,7 +35,7 @@ def model_vgg16(img_height=48,
 				grayscale=True,
 				num_classes=7
 				):
-	"""A group of stacked residual blocks for ResNetV1
+	"""Function to output the VGG16 CNN Model
        Args:
           img_height: integer,default '48', input image height
           img_width: integer,default '48', input image width
@@ -93,6 +93,78 @@ def model_vgg16(img_height=48,
 	output = Dense(units=num_classes, activation=a_output, name="DenseFinal")(x)
 
 	model = Model(inputs=input_img, outputs=output, name="VGG16")
+
+	return model
+
+
+def model_vgg19(img_height=48,
+				img_width=48,
+				a_hidden='relu',  # Hidden activation
+				a_output='softmax',  # Output activation
+				grayscale=True,
+				num_classes=7
+				):
+	"""Function to output the VGG19 CNN Model
+       Args:
+          img_height: integer,default '48', input image height
+          img_width: integer,default '48', input image width
+          a_hidden: string,default 'relu', activation function used for hidden layerss
+          a_output: string, default 'softmax', output activation function
+          grayscale: bool, states when the input tensor is RGB or Grayscale
+          num_classes: integer, default 7,states the number of classes
+        Returns:
+          Output A `keras.Model` instance.
+    """
+	# Input
+	if grayscale:
+		input_img = Input(shape=(img_height, img_width, 1), name="img")
+	else:
+		input_img = Input(shape=(img_height, img_width, 3), name="img")
+		# Rescale if the data is RGB
+		input_img = layers.experimental.preprocessing.Rescaling(1. / 255)(input_img)
+
+	# Data Augmentation
+	input_img = data_augmentation(input_img)
+
+	# 1st Conv Block
+	x = Conv2D(filters=64, kernel_size=3, padding='same', activation=a_hidden, name="Conv1.1")(input_img)
+	x = Conv2D(filters=64, kernel_size=3, padding='same', activation=a_hidden, name="Conv1.2")(x)
+	x = MaxPool2D(pool_size=2, strides=2, padding='same', name="MaxPool2D_1")(x)
+
+	# 2nd Conv Block
+	x = Conv2D(filters=128, kernel_size=3, padding='same', activation=a_hidden, name="Conv2.1")(x)
+	x = Conv2D(filters=128, kernel_size=3, padding='same', activation=a_hidden, name="Conv2.2")(x)
+	x = MaxPool2D(pool_size=2, strides=2, padding='same', name="MaxPool2D_2")(x)
+
+	# 3rd Conv block
+	x = Conv2D(filters=256, kernel_size=3, padding='same', activation=a_hidden, name="Conv3.1")(x)
+	x = Conv2D(filters=256, kernel_size=3, padding='same', activation=a_hidden, name="Conv3.2")(x)
+	x = Conv2D(filters=256, kernel_size=3, padding='same', activation=a_hidden, name="Conv3.3")(x)
+	x = Conv2D(filters=256, kernel_size=3, padding='same', activation=a_hidden, name="Conv3.4")(x)
+	x = MaxPool2D(pool_size=2, strides=2, padding='same', name="MaxPool2D_3")(x)
+
+	# 4th Conv block
+	x = Conv2D(filters=512, kernel_size=3, padding='same', activation=a_hidden, name="Conv4.1")(x)
+	x = Conv2D(filters=512, kernel_size=3, padding='same', activation=a_hidden, name="Conv4.2")(x)
+	x = Conv2D(filters=512, kernel_size=3, padding='same', activation=a_hidden, name="Conv4.3")(x)
+	x = Conv2D(filters=512, kernel_size=3, padding='same', activation=a_hidden, name="Conv4.4")(x)
+	x = MaxPool2D(pool_size=2, strides=2, padding='same', name="MaxPool2D_4")(x)
+
+	# 5th Conv block
+	x = Conv2D(filters=512, kernel_size=3, padding='same', activation=a_hidden, name="Conv5.1")(x)
+	x = Conv2D(filters=512, kernel_size=3, padding='same', activation=a_hidden, name="Conv5.2")(x)
+	x = Conv2D(filters=512, kernel_size=3, padding='same', activation=a_hidden, name="Conv5.3")(x)
+	x = Conv2D(filters=512, kernel_size=3, padding='same', activation=a_hidden, name="Conv5.4")(x)
+	x = MaxPool2D(pool_size=2, strides=2, padding='same', name="MaxPool2D_5")(x)
+
+	# Fully connected layers
+	x = Flatten()(x)
+	x = Dense(units=4096, activation=a_hidden, name="Dense1")(x)
+	x = Dense(units=4096, activation=a_hidden, name="Dense2")(x)
+
+	output = Dense(units=num_classes, activation=a_output, name="DenseFinal")(x)
+
+	model = Model(inputs=input_img, outputs=output, name="VGG19")
 
 	return model
 
@@ -158,7 +230,7 @@ def model_ResNet50_V1(
 
 	output = layers.Dense(num_classes, activation=a_output, name='DenseFinal')(x)
 
-	model = Model(inputs=input_img, outputs=output, name="ResNet50_V1")
+	model = Model(inputs=input_img, outputs=output, name="ResNet50_V1" + model)
 	return model
 
 
@@ -224,5 +296,7 @@ def model_ResNet_V2(
 
 	output = layers.Dense(num_classes, activation=a_output, name='DenseFinal')(x)
 
-	model = Model(inputs=input_img, outputs=output, name="ResNet50_V2")
+	model = Model(inputs=input_img, outputs=output, name="ResNet50_V2" + model)
 	return model
+
+

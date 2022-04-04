@@ -178,7 +178,7 @@ def model_ResNet50_V1(
 		a_output='softmax',
 		pooling='avg',
 		grayscale=True,
-		attention=None,
+		attention="",
 		num_classes=7):
 	"""Function that is able to return different ResNet V1 Models
        Args:

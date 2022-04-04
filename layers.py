@@ -7,18 +7,21 @@ from keras import backend
 def select_attention(input_layer, filter_num, block_name=None, layer_name=None):
 	if block_name == "SEnet":
 		output = squeeze_excitation_block(input_layer, filter_num, 32.0, name=layer_name + "_SNE_")
+		return output
 	if block_name == "ECANet":
-		output = ECA_Net_block(input_layer)
+		output = ECA_Net_block(input_layer , name=layer_name + "_ECANet_")
+		return output
+
 	if block_name == "CBAM":
-		output = CBAM_block(input_layer, filter_num, reduction_ratio=16, name=layer_name + "_CBAM_")
+		output = CBAM_block(input_layer, filter_num, reduction_ratio=8, name=layer_name + "_CBAM_")
+		return output
 	else:
 		output = input_layer
-
 	return output
 
 
 def residual_block_v1(x, filters, kernel_size=3, stride=1, conv_shortcut=True,
-					  name=None, attention=None):
+					  name=None, attention=""):
 	"""A residual block for ResNetV1
     Args:
       x: input tensor.
@@ -57,8 +60,9 @@ def residual_block_v1(x, filters, kernel_size=3, stride=1, conv_shortcut=True,
 	x = layers.BatchNormalization(
 		axis=batch_axis, epsilon=1.001e-5, name=name + '_3_BN')(x)
 
-	# If attention is enabled use the attention block
-	if not attention:
+	if attention == "":
+		x = x
+	else:
 		x = select_attention(x, filters3, block_name=attention, layer_name=name)
 
 	x = layers.Add(name=name + '_Add')([shortcut, x])
@@ -67,7 +71,7 @@ def residual_block_v1(x, filters, kernel_size=3, stride=1, conv_shortcut=True,
 	return x
 
 
-def group_residuals_v1(x, filters, blocks, stride1=2, name=None, attention=None):
+def group_residuals_v1(x, filters, blocks, attention ,stride1=2, name=None):
 	"""A group of stacked residual blocks for ResNetV1
     Args:
       x: tensor, input

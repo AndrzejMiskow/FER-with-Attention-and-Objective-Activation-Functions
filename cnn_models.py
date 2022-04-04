@@ -8,8 +8,10 @@ from tensorflow.keras import layers
 from tensorflow.keras import Model
 from tensorflow.keras.layers import Input, Conv2D, MaxPool2D, Flatten, Dense
 from tensorflow.keras.optimizers import Adam, RMSprop, SGD, Adamax
+from keras import backend
 
 from layers import *
+from attention_modules import *
 
 
 def gpu_check():
@@ -176,6 +178,7 @@ def model_ResNet50_V1(
 		a_output='softmax',
 		pooling='avg',
 		grayscale=True,
+		attention=None,
 		num_classes=7):
 	"""Function that is able to return different ResNet V1 Models
        Args:
@@ -191,6 +194,7 @@ def model_ResNet50_V1(
     """
 	# Input
 	batch_axis = 1
+
 	if grayscale:
 		input_img = Input(shape=(img_height, img_width, 1), name="img")
 	else:
@@ -199,6 +203,8 @@ def model_ResNet50_V1(
 
 	if model == "ResNet50":
 		num_blocks = [3, 4, 6, 3]
+	elif model == "ResNet18":
+		num_blocks = [2, 2, 2, 2]
 	elif model == "ResNet101":
 		num_blocks = [3, 4, 23, 3]
 	elif model == "ResNet152":
@@ -217,10 +223,10 @@ def model_ResNet50_V1(
 	x = layers.MaxPooling2D(3, strides=2, name='MaxPool2D_1')(x)
 
 	# Residual Stacked Blocks
-	x = group_residuals_v1(x, [64, 64, 256], num_blocks[0], stride1=1, name='Conv2')
-	x = group_residuals_v1(x, [128, 128, 512], num_blocks[1], name='Conv3')
-	x = group_residuals_v1(x, [256, 256, 1024], num_blocks[2], name='Conv4')
-	x = group_residuals_v1(x, [512, 512, 2048], num_blocks[3], name='Conv5')
+	x = group_residuals_v1(x, [64, 64, 256], num_blocks[0], stride1=1, name='Conv2', attention=attention)
+	x = group_residuals_v1(x, [128, 128, 512], num_blocks[1], name='Conv3', attention=attention)
+	x = group_residuals_v1(x, [256, 256, 1024], num_blocks[2], name='Conv4', attention=attention)
+	x = group_residuals_v1(x, [512, 512, 2048], num_blocks[3], name='Conv5', attention=attention)
 
 	# Output
 	if pooling == 'avg':
@@ -241,6 +247,7 @@ def model_ResNet_V2(
 		a_output='softmax',
 		pooling='avg',
 		grayscale=True,
+		attention=None,
 		num_classes=7):
 	"""Function that is able to return diffrent Resnet V2 models
        Args:
@@ -279,10 +286,10 @@ def model_ResNet_V2(
 	x = layers.MaxPooling2D(3, strides=2, name='MaxPool2D_1')(x)
 
 	# Residual Stacked Blocks
-	x = group_residuals_v2(x, [64, 64, 256], num_blocks[0], stride1=2, name='Conv2')
-	x = group_residuals_v2(x, [128, 128, 512], num_blocks[1], stride1=2, name='Conv3')
-	x = group_residuals_v2(x, [256, 256, 1024], num_blocks[2], stride1=2, name='Conv4')
-	x = group_residuals_v2(x, [512, 512, 2048], num_blocks[3], stride1=1, name='Conv5')
+	x = group_residuals_v2(x, [64, 64, 256], num_blocks[0], stride1=2, name='Conv2', attention=attention)
+	x = group_residuals_v2(x, [128, 128, 512], num_blocks[1], stride1=2, name='Conv3', attention=attention)
+	x = group_residuals_v2(x, [256, 256, 1024], num_blocks[2], stride1=2, name='Conv4', attention=attention)
+	x = group_residuals_v2(x, [512, 512, 2048], num_blocks[3], stride1=1, name='Conv5', attention=attention)
 
 	# Due to pre-activation we need to apply activation to last conv block
 	x = layers.BatchNormalization(axis=batch_axis, epsilon=1.001e-5, name='Final_BN')(x)
@@ -300,3 +307,29 @@ def model_ResNet_V2(
 	return model
 
 
+def test_attention(
+		img_height=48,
+		img_width=48,
+		a_output='softmax',
+		pooling='avg',
+		grayscale=True,
+		num_classes=7):
+	if grayscale:
+		input_img = Input(shape=(img_height, img_width, 1), name="img")
+	else:
+		input_img = Input(shape=(img_height, img_width, 3), name="img")
+		input_img = layers.experimental.preprocessing.Rescaling(1. / 255)(input_img)
+
+	x = BAM_block(input_img, filter_num=48 * 3, reduction_ratio=4, dilution_conv=2, name="BAM")
+
+	# Output
+	if pooling == 'avg':
+		x = layers.GlobalAveragePooling2D(name='AvgPool2D_Final')(x)
+	else:
+		x = layers.GlobalMaxPooling2D(name='MaxPool2D_Final')(x)
+
+	output = layers.Dense(num_classes, activation=a_output, name='DenseFinal')(x)
+
+	model = Model(inputs=input_img, outputs=output, name="BAM")
+
+	return model

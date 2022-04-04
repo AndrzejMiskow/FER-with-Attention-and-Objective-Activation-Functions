@@ -1,8 +1,24 @@
 from tensorflow.keras import layers
 from tensorflow.keras.layers import Input, Conv2D, MaxPool2D, Flatten, Dense, BatchNormalization, Activation
+from attention_modules import *
+from keras import backend
 
 
-def residual_block_v1(x, filters, kernel_size=3, stride=1, conv_shortcut=True, name=None, grayscale=True):
+def select_attention(input_layer, filter_num, block_name=None, layer_name=None):
+	if block_name == "SEnet":
+		output = squeeze_excitation_block(input_layer, filter_num, 32.0, name=layer_name + "_SNE_")
+	if block_name == "ECANet":
+		output = ECA_Net_block(input_layer)
+	if block_name == "CBAM":
+		output = CBAM_block(input_layer, filter_num, reduction_ratio=16, name=layer_name + "_CBAM_")
+	else:
+		output = input_layer
+
+	return output
+
+
+def residual_block_v1(x, filters, kernel_size=3, stride=1, conv_shortcut=True,
+					  name=None, attention=None):
 	"""A residual block for ResNetV1
     Args:
       x: input tensor.
@@ -11,7 +27,7 @@ def residual_block_v1(x, filters, kernel_size=3, stride=1, conv_shortcut=True, n
       stride: default 1, stride of the first layer.
       conv_shortcut: default True, use convolution shortcut if True, otherwise identity shortcut.
       name: string, block label.
-      grayscale: bool, states when the input tensor is RGB or Grayscale.
+      attention: string, select attention method
     Returns:
       Output tensor for the residual block.
     """
@@ -22,7 +38,7 @@ def residual_block_v1(x, filters, kernel_size=3, stride=1, conv_shortcut=True, n
 		shortcut = layers.Conv2D(
 			filters3, 1, strides=stride, name=name + '_Shortcut_Conv')(x)
 		shortcut = layers.BatchNormalization(
-			axis=batch_axis, epsilon=1.001e-5, name=name + '_Shortcut_BN')(shortcut)
+			axis=batch_axis, name=name + '_Shortcut_BN')(shortcut)
 	else:
 		shortcut = x
 
@@ -41,13 +57,17 @@ def residual_block_v1(x, filters, kernel_size=3, stride=1, conv_shortcut=True, n
 	x = layers.BatchNormalization(
 		axis=batch_axis, epsilon=1.001e-5, name=name + '_3_BN')(x)
 
+	# If attention is enabled use the attention block
+	if not attention:
+		x = select_attention(x, filters3, block_name=attention, layer_name=name)
+
 	x = layers.Add(name=name + '_Add')([shortcut, x])
 	x = layers.Activation('relu', name=name + '_Output')(x)
 
 	return x
 
 
-def group_residuals_v1(x, filters, blocks, stride1=2, name=None):
+def group_residuals_v1(x, filters, blocks, stride1=2, name=None, attention=None):
 	"""A group of stacked residual blocks for ResNetV1
     Args:
       x: tensor, input
@@ -58,15 +78,18 @@ def group_residuals_v1(x, filters, blocks, stride1=2, name=None):
     Returns:
       Output tensor for the stacked blocks.
     """
-
-	x = residual_block_v1(x, filters, stride=stride1, name=name + '_Block1')
+	x = residual_block_v1(x, filters, stride=stride1, name=name + '_Block1', attention=attention)
 
 	for i in range(2, blocks + 1):
-		x = residual_block_v1(x, filters, conv_shortcut=False, name=name + '_Block' + str(i))
+		x = residual_block_v1(x, filters, conv_shortcut=False, name=name + '_Block' + str(i), attention=attention)
+
 	return x
 
 
-def residual_block_v2(x, filters, kernel_size=3, stride=1, conv_shortcut=False, name=None):
+def residual_block_v2(x, filters, kernel_size=3, stride=1,
+					  conv_shortcut=False,
+					  attention=None
+					  , name=None):
 	"""A residual block for ResNetV2
     Args:
       x: input tensor.
@@ -79,7 +102,7 @@ def residual_block_v2(x, filters, kernel_size=3, stride=1, conv_shortcut=False, 
       Output tensor for the residual block.
     """
 
-	batch_axis = 1
+	batch_axis = 1 if backend.image_data_format() == "channels_first" else -1
 
 	filters1, filters2, filters3 = filters
 
@@ -108,12 +131,16 @@ def residual_block_v2(x, filters, kernel_size=3, stride=1, conv_shortcut=False, 
 	x = layers.Activation('relu', name=name + '_2_Relu')(x)
 
 	x = layers.Conv2D(filters3, 1, name=name + '_3_Conv')(x)
+
+	if not attention:
+		x = select_attention(x, filters3, block_name=attention, layer_name=name)
+
 	x = layers.Add(name=name + '_Add_Output')([shortcut, x])
 
 	return x
 
 
-def group_residuals_v2(x, filters, blocks, stride1=2, name=None):
+def group_residuals_v2(x, filters, blocks, stride1=2, name=None, attention=None):
 	"""A group of stacked residual blocks for ResNetV2
     Args:
       x: tensor, input
@@ -125,9 +152,10 @@ def group_residuals_v2(x, filters, blocks, stride1=2, name=None):
       Output tensor for the stacked blocks.
     """
 
-	x = residual_block_v2(x, filters, conv_shortcut=True, name=name + '_Block1')
+	x = residual_block_v2(x, filters, conv_shortcut=True, name=name + '_Block1', attention=attention)
 	for i in range(2, blocks):
-		x = residual_block_v2(x, filters, name=name + '_Block' + str(i))
+		x = residual_block_v2(x, filters, name=name + '_Block' + str(i), attention=attention)
 	# stride is changed here due to the pre-activation in the next layer
-	x = residual_block_v2(x, filters, stride=stride1, name=name + '_Block' + str(blocks))
+	x = residual_block_v2(x, filters, stride=stride1, name=name + '_Block' + str(blocks), attention=attention)
+
 	return x

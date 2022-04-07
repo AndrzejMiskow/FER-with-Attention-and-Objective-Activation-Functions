@@ -9,7 +9,7 @@ def select_attention(input_layer, filter_num, block_name=None, layer_name=None):
 		output = squeeze_excitation_block(input_layer, filter_num, 32.0, name=layer_name + "_SNE_")
 		return output
 	if block_name == "ECANet":
-		output = ECA_Net_block(input_layer , name=layer_name + "_ECANet_")
+		output = ECA_Net_block(input_layer, name=layer_name + "_ECANet_")
 		return output
 
 	if block_name == "CBAM":
@@ -71,7 +71,7 @@ def residual_block_v1(x, filters, kernel_size=3, stride=1, conv_shortcut=True,
 	return x
 
 
-def group_residuals_v1(x, filters, blocks, attention ,stride1=2, name=None):
+def group_residuals_v1(x, filters, blocks, attention, stride1=2, name=None):
 	"""A group of stacked residual blocks for ResNetV1
     Args:
       x: tensor, input
@@ -106,7 +106,7 @@ def residual_block_v2(x, filters, kernel_size=3, stride=1,
       Output tensor for the residual block.
     """
 
-	batch_axis = 1 if backend.image_data_format() == "channels_first" else -1
+	batch_axis = 1
 
 	filters1, filters2, filters3 = filters
 
@@ -136,7 +136,9 @@ def residual_block_v2(x, filters, kernel_size=3, stride=1,
 
 	x = layers.Conv2D(filters3, 1, name=name + '_3_Conv')(x)
 
-	if not attention:
+	if attention == "":
+		x = x
+	else:
 		x = select_attention(x, filters3, block_name=attention, layer_name=name)
 
 	x = layers.Add(name=name + '_Add_Output')([shortcut, x])

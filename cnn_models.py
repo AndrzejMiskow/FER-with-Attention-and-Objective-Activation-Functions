@@ -35,6 +35,7 @@ def model_vgg16(img_height=48,
 				a_hidden='relu',  # Hidden activation
 				a_output='softmax',  # Output activation
 				grayscale=True,
+				attention="",
 				num_classes=7
 				):
 	"""Function to output the VGG16 CNN Model
@@ -62,29 +63,49 @@ def model_vgg16(img_height=48,
 	# 1st Conv Block
 	x = Conv2D(filters=64, kernel_size=3, padding='same', activation=a_hidden, name="Conv1.1")(input_img)
 	x = Conv2D(filters=64, kernel_size=3, padding='same', activation=a_hidden, name="Conv1.2")(x)
+	if attention == "":
+		x = x
+	else:
+		x = select_attention(x, 64, block_name=attention, layer_name="Conv1")
 	x = MaxPool2D(pool_size=2, strides=2, padding='same', name="MaxPool2D_1")(x)
 
 	# 2nd Conv Block
 	x = Conv2D(filters=128, kernel_size=3, padding='same', activation=a_hidden, name="Conv2.1")(x)
 	x = Conv2D(filters=128, kernel_size=3, padding='same', activation=a_hidden, name="Conv2.2")(x)
+	if attention == "":
+		x = x
+	else:
+		x = select_attention(x, 128, block_name=attention, layer_name="Conv2")
 	x = MaxPool2D(pool_size=2, strides=2, padding='same', name="MaxPool2D_2")(x)
 
 	# 3rd Conv block
 	x = Conv2D(filters=256, kernel_size=3, padding='same', activation=a_hidden, name="Conv3.1")(x)
 	x = Conv2D(filters=256, kernel_size=3, padding='same', activation=a_hidden, name="Conv3.2")(x)
 	x = Conv2D(filters=256, kernel_size=3, padding='same', activation=a_hidden, name="Conv3.3")(x)
+	if attention == "":
+		x = x
+	else:
+		x = select_attention(x, 256, block_name=attention, layer_name="Conv3")
 	x = MaxPool2D(pool_size=2, strides=2, padding='same', name="MaxPool2D_3")(x)
 
 	# 4th Conv block
 	x = Conv2D(filters=512, kernel_size=3, padding='same', activation=a_hidden, name="Conv4.1")(x)
 	x = Conv2D(filters=512, kernel_size=3, padding='same', activation=a_hidden, name="Conv4.2")(x)
 	x = Conv2D(filters=512, kernel_size=3, padding='same', activation=a_hidden, name="Conv4.3")(x)
+	if attention == "":
+		x = x
+	else:
+		x = select_attention(x, 512, block_name=attention, layer_name="Conv4")
 	x = MaxPool2D(pool_size=2, strides=2, padding='same', name="MaxPool2D_4")(x)
 
 	# 5th Conv block
 	x = Conv2D(filters=512, kernel_size=3, padding='same', activation=a_hidden, name="Conv5.1")(x)
 	x = Conv2D(filters=512, kernel_size=3, padding='same', activation=a_hidden, name="Conv5.2")(x)
 	x = Conv2D(filters=512, kernel_size=3, padding='same', activation=a_hidden, name="Conv5.3")(x)
+	if attention == "":
+		x = x
+	else:
+		x = select_attention(x, 512, block_name=attention, layer_name="Conv5")
 	x = MaxPool2D(pool_size=2, strides=2, padding='same', name="MaxPool2D_5")(x)
 
 	# Fully connected layers
@@ -93,8 +114,12 @@ def model_vgg16(img_height=48,
 	x = Dense(units=4096, activation=a_hidden, name="Dense2")(x)
 
 	output = Dense(units=num_classes, activation=a_output, name="DenseFinal")(x)
+	if attention == "":
+		model_name = "VGG16"
+	else:
+		model_name = "VGG16" + "_" + attention
 
-	model = Model(inputs=input_img, outputs=output, name="VGG16")
+	model = Model(inputs=input_img, outputs=output, name=model_name)
 
 	return model
 
@@ -104,8 +129,8 @@ def model_vgg19(img_height=48,
 				a_hidden='relu',  # Hidden activation
 				a_output='softmax',  # Output activation
 				grayscale=True,
-				num_classes=7
-				):
+				attention="",
+				num_classes=7):
 	"""Function to output the VGG19 CNN Model
        Args:
           img_height: integer,default '48', input image height
@@ -131,11 +156,19 @@ def model_vgg19(img_height=48,
 	# 1st Conv Block
 	x = Conv2D(filters=64, kernel_size=3, padding='same', activation=a_hidden, name="Conv1.1")(input_img)
 	x = Conv2D(filters=64, kernel_size=3, padding='same', activation=a_hidden, name="Conv1.2")(x)
+	if attention == "":
+		x = x
+	else:
+		x = select_attention(x, 64, block_name=attention, layer_name="Conv1")
 	x = MaxPool2D(pool_size=2, strides=2, padding='same', name="MaxPool2D_1")(x)
 
 	# 2nd Conv Block
 	x = Conv2D(filters=128, kernel_size=3, padding='same', activation=a_hidden, name="Conv2.1")(x)
 	x = Conv2D(filters=128, kernel_size=3, padding='same', activation=a_hidden, name="Conv2.2")(x)
+	if attention == "":
+		x = x
+	else:
+		x = select_attention(x, 128, block_name=attention, layer_name="Conv2")
 	x = MaxPool2D(pool_size=2, strides=2, padding='same', name="MaxPool2D_2")(x)
 
 	# 3rd Conv block
@@ -143,6 +176,10 @@ def model_vgg19(img_height=48,
 	x = Conv2D(filters=256, kernel_size=3, padding='same', activation=a_hidden, name="Conv3.2")(x)
 	x = Conv2D(filters=256, kernel_size=3, padding='same', activation=a_hidden, name="Conv3.3")(x)
 	x = Conv2D(filters=256, kernel_size=3, padding='same', activation=a_hidden, name="Conv3.4")(x)
+	if attention == "":
+		x = x
+	else:
+		x = select_attention(x, 256, block_name=attention, layer_name="Conv3")
 	x = MaxPool2D(pool_size=2, strides=2, padding='same', name="MaxPool2D_3")(x)
 
 	# 4th Conv block
@@ -150,6 +187,10 @@ def model_vgg19(img_height=48,
 	x = Conv2D(filters=512, kernel_size=3, padding='same', activation=a_hidden, name="Conv4.2")(x)
 	x = Conv2D(filters=512, kernel_size=3, padding='same', activation=a_hidden, name="Conv4.3")(x)
 	x = Conv2D(filters=512, kernel_size=3, padding='same', activation=a_hidden, name="Conv4.4")(x)
+	if attention == "":
+		x = x
+	else:
+		x = select_attention(x, 512, block_name=attention, layer_name="Conv4")
 	x = MaxPool2D(pool_size=2, strides=2, padding='same', name="MaxPool2D_4")(x)
 
 	# 5th Conv block
@@ -157,6 +198,10 @@ def model_vgg19(img_height=48,
 	x = Conv2D(filters=512, kernel_size=3, padding='same', activation=a_hidden, name="Conv5.2")(x)
 	x = Conv2D(filters=512, kernel_size=3, padding='same', activation=a_hidden, name="Conv5.3")(x)
 	x = Conv2D(filters=512, kernel_size=3, padding='same', activation=a_hidden, name="Conv5.4")(x)
+	if attention == "":
+		x = x
+	else:
+		x = select_attention(x, 512, block_name=attention, layer_name="Conv5")
 	x = MaxPool2D(pool_size=2, strides=2, padding='same', name="MaxPool2D_5")(x)
 
 	# Fully connected layers
@@ -166,12 +211,17 @@ def model_vgg19(img_height=48,
 
 	output = Dense(units=num_classes, activation=a_output, name="DenseFinal")(x)
 
-	model = Model(inputs=input_img, outputs=output, name="VGG19")
+	if attention == "":
+		model_name = "VGG19"
+	else:
+		model_name = "VGG19" + "_" + attention
+
+	model = Model(inputs=input_img, outputs=output, name=model_name)
 
 	return model
 
 
-def model_ResNet50_V1(
+def model_ResNet_V1(
 		model="ResNet50",
 		img_height=48,
 		img_width=48,
@@ -236,7 +286,12 @@ def model_ResNet50_V1(
 
 	output = layers.Dense(num_classes, activation=a_output, name='DenseFinal')(x)
 
-	model = Model(inputs=input_img, outputs=output, name="ResNet50_V1" + model)
+	if attention == "":
+		model = model
+	else:
+		model = model + "_" + attention
+
+	model = Model(inputs=input_img, outputs=output, name="ResNet_V1" + model)
 	return model
 
 
@@ -247,7 +302,7 @@ def model_ResNet_V2(
 		a_output='softmax',
 		pooling='avg',
 		grayscale=True,
-		attention=None,
+		attention="",
 		num_classes=7):
 	"""Function that is able to return diffrent Resnet V2 models
        Args:
@@ -257,6 +312,7 @@ def model_ResNet_V2(
           a_output: string, default 'softmax', output activation function
           pooling: string,default 'avg', pooling used for the final layer either 'avg' or 'max'
           grayscale: bool, states when the input tensor is RGB or Grayscale
+          attention: string, default '', select which Attention block to use SEnet , ECANet or CBAM
           num_classes: integer, default 7,states the number of classes
         Returns:
           Output A `keras.Model` instance.
@@ -276,7 +332,7 @@ def model_ResNet_V2(
 	elif model == "ResNet152":
 		num_blocks = [3, 8, 36, 3]
 
-	input_img = data_augmentation(input_img)
+	# input_img = data_augmentation(input_img)
 
 	# Conv_1
 	x = layers.ZeroPadding2D(padding=((3, 3), (3, 3)), name='Conv1_Pad')(input_img)
@@ -302,6 +358,11 @@ def model_ResNet_V2(
 		x = layers.GlobalMaxPooling2D(name='MaxPool2D_Final')(x)
 
 	output = layers.Dense(num_classes, activation=a_output, name='DenseFinal')(x)
+
+	if attention == "":
+		model = model
+	else:
+		model = model + "_" + attention
 
 	model = Model(inputs=input_img, outputs=output, name="ResNet50_V2" + model)
 	return model

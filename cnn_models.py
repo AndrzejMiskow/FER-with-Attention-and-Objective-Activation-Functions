@@ -34,7 +34,6 @@ def model_vgg16(img_height=48,
 				img_width=48,
 				a_hidden='relu',  # Hidden activation
 				a_output='softmax',  # Output activation
-				grayscale=True,
 				attention="",
 				num_classes=7
 				):
@@ -44,21 +43,12 @@ def model_vgg16(img_height=48,
           img_width: integer,default '48', input image width
           a_hidden: string,default 'relu', activation function used for hidden layerss
           a_output: string, default 'softmax', output activation function
-          grayscale: bool, states when the input tensor is RGB or Grayscale
           num_classes: integer, default 7,states the number of classes
         Returns:
           Output A `keras.Model` instance.
     """
 	# Input
-	if grayscale:
-		input_img = Input(shape=(img_height, img_width, 1), name="img")
-	else:
-		input_img = Input(shape=(img_height, img_width, 3), name="img")
-		# Rescale if the data is RGB
-		input_img = layers.experimental.preprocessing.Rescaling(1. / 255)(input_img)
-
-	# Data Augmentation
-	input_img = data_augmentation(input_img)
+	input_img = Input(shape=(img_height, img_width, 1), name="img")
 
 	# 1st Conv Block
 	x = Conv2D(filters=64, kernel_size=3, padding='same', activation=a_hidden, name="Conv1.1")(input_img)
@@ -128,7 +118,6 @@ def model_vgg19(img_height=48,
 				img_width=48,
 				a_hidden='relu',  # Hidden activation
 				a_output='softmax',  # Output activation
-				grayscale=True,
 				attention="",
 				num_classes=7):
 	"""Function to output the VGG19 CNN Model
@@ -137,21 +126,12 @@ def model_vgg19(img_height=48,
           img_width: integer,default '48', input image width
           a_hidden: string,default 'relu', activation function used for hidden layerss
           a_output: string, default 'softmax', output activation function
-          grayscale: bool, states when the input tensor is RGB or Grayscale
           num_classes: integer, default 7,states the number of classes
         Returns:
           Output A `keras.Model` instance.
     """
 	# Input
-	if grayscale:
-		input_img = Input(shape=(img_height, img_width, 1), name="img")
-	else:
-		input_img = Input(shape=(img_height, img_width, 3), name="img")
-		# Rescale if the data is RGB
-		input_img = layers.experimental.preprocessing.Rescaling(1. / 255)(input_img)
-
-	# Data Augmentation
-	input_img = data_augmentation(input_img)
+	input_img = Input(shape=(img_height, img_width, 1), name="img")
 
 	# 1st Conv Block
 	x = Conv2D(filters=64, kernel_size=3, padding='same', activation=a_hidden, name="Conv1.1")(input_img)
@@ -227,7 +207,6 @@ def model_ResNet_V1(
 		img_width=48,
 		a_output='softmax',
 		pooling='avg',
-		grayscale=True,
 		attention="",
 		num_classes=7):
 	"""Function that is able to return different ResNet V1 Models
@@ -237,7 +216,7 @@ def model_ResNet_V1(
           img_width: integer,default '48', input image width
           a_output: string, default 'softmax', output activation function
           pooling: string,default 'avg', pooling used for the final layer either 'avg' or 'max'
-          grayscale: bool, states when the input tensor is RGB or Grayscale
+          attention: string, default '', select which Attention block to use SEnet , ECANet or CBAM
           num_classes: integer, default 7,states the number of classes
         Returns:
           Output A `keras.Model` instance.
@@ -245,11 +224,7 @@ def model_ResNet_V1(
 	# Input
 	batch_axis = 1
 
-	if grayscale:
-		input_img = Input(shape=(img_height, img_width, 1), name="img")
-	else:
-		input_img = Input(shape=(img_height, img_width, 3), name="img")
-		input_img = layers.experimental.preprocessing.Rescaling(1. / 255)(input_img)
+	input_img = Input(shape=(img_height, img_width, 1), name="img")
 
 	if model == "ResNet50":
 		num_blocks = [3, 4, 6, 3]
@@ -301,17 +276,15 @@ def model_ResNet_V2(
 		img_width=48,
 		a_output='softmax',
 		pooling='avg',
-		grayscale=True,
 		attention="",
 		num_classes=7):
-	"""Function that is able to return diffrent Resnet V2 models
+	"""Function that is able to return different Resnet V2 models
        Args:
        	  model: string, default 'ResNet50', select which ResNet model to use ResNet50 , ResNet101 or ResNet152
           img_height: integer,default '48', input image height
           img_width: integer,default '48', input image width
           a_output: string, default 'softmax', output activation function
           pooling: string,default 'avg', pooling used for the final layer either 'avg' or 'max'
-          grayscale: bool, states when the input tensor is RGB or Grayscale
           attention: string, default '', select which Attention block to use SEnet , ECANet or CBAM
           num_classes: integer, default 7,states the number of classes
         Returns:
@@ -319,11 +292,7 @@ def model_ResNet_V2(
     """
 	# Input
 	batch_axis = 1
-	if grayscale:
-		input_img = Input(shape=(img_height, img_width, 1), name="img")
-	else:
-		input_img = Input(shape=(img_height, img_width, 3), name="img")
-		input_img = layers.experimental.preprocessing.Rescaling(1. / 255)(input_img)
+	input_img = Input(shape=(img_height, img_width, 1), name="img")
 
 	if model == "ResNet50":
 		num_blocks = [3, 4, 6, 3]

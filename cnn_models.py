@@ -53,50 +53,44 @@ def model_vgg16(img_height=48,
 	# 1st Conv Block
 	x = Conv2D(filters=64, kernel_size=3, padding='same', activation=a_hidden, name="Conv1.1")(input_img)
 	x = Conv2D(filters=64, kernel_size=3, padding='same', activation=a_hidden, name="Conv1.2")(x)
-	if attention == "":
-		x = x
-	else:
-		x = select_attention(x, 64, block_name=attention, layer_name="Conv1")
 	x = MaxPool2D(pool_size=2, strides=2, padding='same', name="MaxPool2D_1")(x)
 
 	# 2nd Conv Block
 	x = Conv2D(filters=128, kernel_size=3, padding='same', activation=a_hidden, name="Conv2.1")(x)
 	x = Conv2D(filters=128, kernel_size=3, padding='same', activation=a_hidden, name="Conv2.2")(x)
-	if attention == "":
-		x = x
-	else:
-		x = select_attention(x, 128, block_name=attention, layer_name="Conv2")
 	x = MaxPool2D(pool_size=2, strides=2, padding='same', name="MaxPool2D_2")(x)
 
 	# 3rd Conv block
 	x = Conv2D(filters=256, kernel_size=3, padding='same', activation=a_hidden, name="Conv3.1")(x)
 	x = Conv2D(filters=256, kernel_size=3, padding='same', activation=a_hidden, name="Conv3.2")(x)
 	x = Conv2D(filters=256, kernel_size=3, padding='same', activation=a_hidden, name="Conv3.3")(x)
-	if attention == "":
-		x = x
-	else:
-		x = select_attention(x, 256, block_name=attention, layer_name="Conv3")
 	x = MaxPool2D(pool_size=2, strides=2, padding='same', name="MaxPool2D_3")(x)
 
 	# 4th Conv block
 	x = Conv2D(filters=512, kernel_size=3, padding='same', activation=a_hidden, name="Conv4.1")(x)
 	x = Conv2D(filters=512, kernel_size=3, padding='same', activation=a_hidden, name="Conv4.2")(x)
 	x = Conv2D(filters=512, kernel_size=3, padding='same', activation=a_hidden, name="Conv4.3")(x)
-	if attention == "":
-		x = x
-	else:
-		x = select_attention(x, 512, block_name=attention, layer_name="Conv4")
 	x = MaxPool2D(pool_size=2, strides=2, padding='same', name="MaxPool2D_4")(x)
 
 	# 5th Conv block
 	x = Conv2D(filters=512, kernel_size=3, padding='same', activation=a_hidden, name="Conv5.1")(x)
 	x = Conv2D(filters=512, kernel_size=3, padding='same', activation=a_hidden, name="Conv5.2")(x)
 	x = Conv2D(filters=512, kernel_size=3, padding='same', activation=a_hidden, name="Conv5.3")(x)
+	x = MaxPool2D(pool_size=2, strides=2, padding='same', name="MaxPool2D_5")(x)
+
 	if attention == "":
 		x = x
 	else:
-		x = select_attention(x, 512, block_name=attention, layer_name="Conv5")
-	x = MaxPool2D(pool_size=2, strides=2, padding='same', name="MaxPool2D_5")(x)
+		if attention == "SEnet":
+			attention_output = squeeze_excitation_block(x, 512, 32.0, name="Conv_Last_SNE_")
+		if attention == "ECANet":
+			attention_output = ECA_Net_block(x, kernel_size=3, name="Conv_Last_ECANet_")
+		if attention == "CBAM":
+			attention_output = CBAM_block(x, 512, reduction_ratio=32, kernel_size=7, name="Conv_Last_CBAM_")
+		if attention == "BAM":
+			attention_output = BAM_block(x, 512, 32, 2, name="Conv_Last_BAM_")
+
+		x = layers.Add(name='ConvLast_Add1')([attention_output, x])
 
 	# Fully connected layers
 	x = Flatten()(x)
@@ -136,19 +130,11 @@ def model_vgg19(img_height=48,
 	# 1st Conv Block
 	x = Conv2D(filters=64, kernel_size=3, padding='same', activation=a_hidden, name="Conv1.1")(input_img)
 	x = Conv2D(filters=64, kernel_size=3, padding='same', activation=a_hidden, name="Conv1.2")(x)
-	if attention == "":
-		x = x
-	else:
-		x = select_attention(x, 64, block_name=attention, layer_name="Conv1")
 	x = MaxPool2D(pool_size=2, strides=2, padding='same', name="MaxPool2D_1")(x)
 
 	# 2nd Conv Block
 	x = Conv2D(filters=128, kernel_size=3, padding='same', activation=a_hidden, name="Conv2.1")(x)
 	x = Conv2D(filters=128, kernel_size=3, padding='same', activation=a_hidden, name="Conv2.2")(x)
-	if attention == "":
-		x = x
-	else:
-		x = select_attention(x, 128, block_name=attention, layer_name="Conv2")
 	x = MaxPool2D(pool_size=2, strides=2, padding='same', name="MaxPool2D_2")(x)
 
 	# 3rd Conv block
@@ -156,21 +142,12 @@ def model_vgg19(img_height=48,
 	x = Conv2D(filters=256, kernel_size=3, padding='same', activation=a_hidden, name="Conv3.2")(x)
 	x = Conv2D(filters=256, kernel_size=3, padding='same', activation=a_hidden, name="Conv3.3")(x)
 	x = Conv2D(filters=256, kernel_size=3, padding='same', activation=a_hidden, name="Conv3.4")(x)
-	if attention == "":
-		x = x
-	else:
-		x = select_attention(x, 256, block_name=attention, layer_name="Conv3")
 	x = MaxPool2D(pool_size=2, strides=2, padding='same', name="MaxPool2D_3")(x)
 
 	# 4th Conv block
 	x = Conv2D(filters=512, kernel_size=3, padding='same', activation=a_hidden, name="Conv4.1")(x)
 	x = Conv2D(filters=512, kernel_size=3, padding='same', activation=a_hidden, name="Conv4.2")(x)
 	x = Conv2D(filters=512, kernel_size=3, padding='same', activation=a_hidden, name="Conv4.3")(x)
-	x = Conv2D(filters=512, kernel_size=3, padding='same', activation=a_hidden, name="Conv4.4")(x)
-	if attention == "":
-		x = x
-	else:
-		x = select_attention(x, 512, block_name=attention, layer_name="Conv4")
 	x = MaxPool2D(pool_size=2, strides=2, padding='same', name="MaxPool2D_4")(x)
 
 	# 5th Conv block
@@ -178,11 +155,21 @@ def model_vgg19(img_height=48,
 	x = Conv2D(filters=512, kernel_size=3, padding='same', activation=a_hidden, name="Conv5.2")(x)
 	x = Conv2D(filters=512, kernel_size=3, padding='same', activation=a_hidden, name="Conv5.3")(x)
 	x = Conv2D(filters=512, kernel_size=3, padding='same', activation=a_hidden, name="Conv5.4")(x)
+	x = MaxPool2D(pool_size=2, strides=2, padding='same', name="MaxPool2D_5")(x)
+
 	if attention == "":
 		x = x
 	else:
-		x = select_attention(x, 512, block_name=attention, layer_name="Conv5")
-	x = MaxPool2D(pool_size=2, strides=2, padding='same', name="MaxPool2D_5")(x)
+		if attention == "SEnet":
+			attention_output = squeeze_excitation_block(x, 512, 32.0, name="Conv_Last_SNE_")
+		if attention == "ECANet":
+			attention_output = ECA_Net_block(x, kernel_size=3, name="Conv_Last_ECANet_")
+		if attention == "CBAM":
+			attention_output = CBAM_block(x, 512, reduction_ratio=32, kernel_size=7, name="Conv_Last_CBAM_")
+		if attention == "BAM":
+			attention_output = BAM_block(x, 512, 32, 2, name="Conv_Last_BAM_")
+
+		x = layers.Add(name='ConvLast_Add1')([attention_output, x])
 
 	# Fully connected layers
 	x = Flatten()(x)

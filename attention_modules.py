@@ -110,30 +110,32 @@ def BAM_block(input_layer, filter_num, reduction_ratio, dilution_conv=2, name=No
 
 	# CHANNEL ATTENTION
 	# Global Average Pool to get channel vector [C x 1 x 1]
-	avg_pool = layers.GlobalAveragePooling2D(name=name + "_Chanel_AveragePooling")(input_layer)
-	# avg_pool = tf.reduce_mean(input_layer, axis=axis[1, 2], keepdims=True)
+	# avg_pool = layers.GlobalAveragePooling2D(name=name + "_Chanel_AveragePooling")(input_layer)
+	avg_pool = tf.reduce_mean(input_layer, axis=[1, 2], keepdims=True)
 
-	gate_chanels = [filter_num]
-	gate_chanels += [filter_num // reduction_ratio] * dilution_conv
-	gate_chanels += [filter_num]
-
-	flaten = layers.Flatten()(avg_pool)
-	for i in range(len(gate_chanels) - 2):
-		fc = layers.Dense(gate_chanels[i + 1])(flaten)
-		fc = layers.BatchNormalization(axis=axis, epsilon=1.001e-5, name=name + '_Chanel_FC1_BN')(fc)
-		fc = layers.Activation('relu')(fc)
-	channel_output = layers.Dense(gate_chanels[-1])(fc)
-	channel_output = layers.Reshape((1, 1, filter_num), name=name + "_Chanel_Reshape")(channel_output)
-
-	# # Fully Connected Layer 1
-	# fc1 = layers.Dense(filter_num // reduction_ratio, name=name + "_Chanel_FC1")(avg_pool)
-	# fc1 = layers.BatchNormalization(axis=axis, epsilon=1.001e-5, name=name + '_Chanel_FC1_BN')(fc1)
-	# fc1 = layers.Activation('relu', name=name + "_Chanel_FC1_Relu")(fc1)
+	# gate_chanels = [filter_num]
+	# gate_chanels += [filter_num // reduction_ratio] * dilution_conv
+	# gate_chanels += [filter_num]
 	#
-	# # Fully Connected Layer 2
-	# fc2 = layers.Dense(filter_num, name=name + "_Chanel_FC2")(fc1)
-	# fc2 = layers.BatchNormalization(axis=axis, epsilon=1.001e-5, name=name + '_Chanel_FC2_BN')(fc2)
-	# channel_output = layers.Activation('relu', name=name + "_Chanel_FC2_Relu")(fc2)
+	# flaten = layers.Flatten()(avg_pool)
+	# for i in range(len(gate_chanels) - 2):
+	# 	fc = layers.Dense(gate_chanels[i + 1])(flaten)
+	# 	fc = layers.BatchNormalization(axis=axis, epsilon=1.001e-5, name=name + '_Chanel_FC1_BN')(fc)
+	# 	fc = layers.Activation('relu')(fc)
+	# channel_output = layers.Dense(gate_chanels[-1])(fc)
+	# channel_output = layers.Reshape((1, 1, filter_num), name=name + "_Chanel_Reshape")(channel_output)
+
+	# Fully Connected Layer 1
+	fc1 = layers.Dense(filter_num // reduction_ratio, name=name + "_Chanel_FC1")(avg_pool)
+	fc1 = layers.BatchNormalization(axis=axis, epsilon=1.001e-5, name=name + '_Chanel_FC1_BN')(fc1)
+	fc1 = layers.Activation('relu', name=name + "_Chanel_FC1_Relu")(fc1)
+
+	# Fully Connected Layer 2
+	fc2 = layers.Dense(filter_num, name=name + "_Chanel_FC2")(fc1)
+	fc2 = layers.BatchNormalization(axis=axis, epsilon=1.001e-5, name=name + '_Chanel_FC2_BN')(fc2)
+	channel_output = layers.Activation('relu', name=name + "_Chanel_FC2_Relu")(fc2)
+	# channel_output = layers.Reshape((filter_num,1,1), name=name + "_Chanel_Reshape")(channel_output)
+
 
 	# SPATIAL ATTENTION
 	spatial = layers.Conv2D(filter_num // reduction_ratio, kernel_size=1, name=name + '_Spatial_1x1_Conv')(input_layer)

@@ -13,6 +13,8 @@ train_data = "data/train/"
 test_data = "data/test/"
 
 
+
+
 # Information on number of images in each folder
 def number_of_images(path, folder_name):
 	image = {}
@@ -58,7 +60,7 @@ def process_data(path):
 
 def test_process_data(image_name):
 	detect_face.import_model(weights)
-	detect_face.run_detect_face(image_name, 80, "result.jpg")
+	detect_face.run_detect_face(image_name, 80, "../result.jpg")
 
 
 # splits the processed data into training and test sets
@@ -71,7 +73,7 @@ def split_training_test(path):
 	# 				   seed=1337, ratio=(.8, .2), group_prefix=None, move=False, oversample=True)
 
 	# Change folder name of val to test
-	os.rename("data/val", "data/test")
+	os.rename("data/val", "../data/test")
 
 
 # data loader for the train , validation and test datasets

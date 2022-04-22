@@ -5,7 +5,7 @@ import tensorflow as tf
 from keras import backend
 
 
-def squeeze_excitation_block(input_layer, out_dim, ratio=4, name=None):
+def squeeze_excitation_block(input_layer, out_dim, ratio=32, name=None):
 	"""Squeeze and Extraction block
    Args:
       input_layer: input tensor
@@ -36,7 +36,7 @@ def squeeze_excitation_block(input_layer, out_dim, ratio=4, name=None):
 	return scale
 
 
-def ECA_Net_block(input_layer, kernel_size=3, name=None):
+def ECA_Net_block(input_layer, kernel_size=3, adaptive=False, name=None):
 	"""ECA-Net: Efficient Channel Attention Block
     Args:
       input_layer: input tensor
@@ -45,6 +45,16 @@ def ECA_Net_block(input_layer, kernel_size=3, name=None):
     Returns:
       Output A tensor for the ECA-Net attention block
     """
+	if adaptive:
+		b = 1
+		gamma = 2
+		channels = input_layer.shape[-1]
+		kernel_size = int(abs((math.log2(channels) + b / gamma)))
+		if (kernel_size % 2) == 0:
+			kernel_size = kernel_size + 1
+		else:
+			kernel_size = kernel_size
+
 	squeeze = layers.GlobalAveragePooling2D(name=name + "_Squeeze_GlobalPooling")(input_layer)
 	squeeze = tf.expand_dims(squeeze, axis=1)
 	excitation = layers.Conv1D(filters=1,
@@ -104,58 +114,3 @@ def CBAM_block(input_layer, filter_num, reduction_ratio=32, kernel_size=7, name=
 
 	return CBAM_out
 
-
-def BAM_block(input_layer, filter_num, reduction_ratio, dilution_conv=2, name=None):
-	axis = -1
-
-	# CHANNEL ATTENTION
-	# Global Average Pool to get channel vector [C x 1 x 1]
-	# avg_pool = layers.GlobalAveragePooling2D(name=name + "_Chanel_AveragePooling")(input_layer)
-	avg_pool = tf.reduce_mean(input_layer, axis=[1, 2], keepdims=True)
-
-	# gate_chanels = [filter_num]
-	# gate_chanels += [filter_num // reduction_ratio] * dilution_conv
-	# gate_chanels += [filter_num]
-	#
-	# flaten = layers.Flatten()(avg_pool)
-	# for i in range(len(gate_chanels) - 2):
-	# 	fc = layers.Dense(gate_chanels[i + 1])(flaten)
-	# 	fc = layers.BatchNormalization(axis=axis, epsilon=1.001e-5, name=name + '_Chanel_FC1_BN')(fc)
-	# 	fc = layers.Activation('relu')(fc)
-	# channel_output = layers.Dense(gate_chanels[-1])(fc)
-	# channel_output = layers.Reshape((1, 1, filter_num), name=name + "_Chanel_Reshape")(channel_output)
-
-	# Fully Connected Layer 1
-	fc1 = layers.Dense(filter_num // reduction_ratio, name=name + "_Chanel_FC1")(avg_pool)
-	fc1 = layers.BatchNormalization(axis=axis, epsilon=1.001e-5, name=name + '_Chanel_FC1_BN')(fc1)
-	fc1 = layers.Activation('relu', name=name + "_Chanel_FC1_Relu")(fc1)
-
-	# Fully Connected Layer 2
-	fc2 = layers.Dense(filter_num, name=name + "_Chanel_FC2")(fc1)
-	fc2 = layers.BatchNormalization(axis=axis, epsilon=1.001e-5, name=name + '_Chanel_FC2_BN')(fc2)
-	channel_output = layers.Activation('relu', name=name + "_Chanel_FC2_Relu")(fc2)
-	# channel_output = layers.Reshape((filter_num,1,1), name=name + "_Chanel_Reshape")(channel_output)
-
-
-	# SPATIAL ATTENTION
-	spatial = layers.Conv2D(filter_num // reduction_ratio, kernel_size=1, name=name + '_Spatial_1x1_Conv')(input_layer)
-	spatial = layers.BatchNormalization(axis=axis, epsilon=1.001e-5, name=name + '_Spatial_BN1')(spatial)
-	spatial = layers.Activation('relu', name=name + "_Spatial_1x1Conv_Relu")(spatial)
-
-	for i in range(dilution_conv):
-		spatial = layers.Conv2D(filter_num // reduction_ratio, kernel_size=3, padding="same",
-								dilation_rate=dilution_conv,
-								name=name + '_Spatial_3x3_Conv_' + str(i + 1))(spatial)
-		spatial = layers.BatchNormalization(axis=axis, epsilon=1.001e-5,
-											name=name + '_Spatial_3x3_Conv_BN_' + str(i + 1))(spatial)
-		spatial = layers.Activation('relu', name=name + "_Spatial_3x3_Conv_Relu_" + str(i + 1))(spatial)
-
-	spatial = layers.Conv2D(1, kernel_size=1, name=name + '_Spatial_Final_Conv')(spatial)
-	spatial_output = layers.BatchNormalization(axis=axis, epsilon=1.001e-5, name=name + '_Spatial_Final_Conv_BN')(
-		spatial)
-
-	add = layers.multiply([channel_output, spatial_output])
-	sigmoid = 1 + tf.math.sigmoid(add)
-	output = sigmoid * input_layer
-
-	return output

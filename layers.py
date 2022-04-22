@@ -6,14 +6,13 @@ from keras import backend
 
 def select_attention(input_layer, filter_num, block_name=None, layer_name=None):
 	if block_name == "SEnet":
-		output = squeeze_excitation_block(input_layer, filter_num, 32.0, name=layer_name + "_SNE_")
+		output = squeeze_excitation_block(input_layer, filter_num, 16.0, name=layer_name + "_SNE_")
 		return output
 	if block_name == "ECANet":
-		output = ECA_Net_block(input_layer, name=layer_name + "_ECANet_")
+		output = ECA_Net_block(input_layer, kernel_size=3, adaptive=True, name=layer_name + "_ECANet_")
 		return output
-
 	if block_name == "CBAM":
-		output = CBAM_block(input_layer, filter_num, reduction_ratio=8, name=layer_name + "_CBAM_")
+		output = CBAM_block(input_layer, filter_num, reduction_ratio=16, name=layer_name + "_CBAM_")
 		return output
 	else:
 		output = input_layer
@@ -48,13 +47,13 @@ def residual_block_v1(x, filters, kernel_size=3, stride=1, conv_shortcut=True,
 	x = layers.Conv2D(filters1, 1, strides=stride, name=name + '_1_Conv')(x)
 	x = layers.BatchNormalization(
 		axis=batch_axis, epsilon=1.001e-5, name=name + '_1_BN')(x)
-	x = layers.Activation('relu', name=name + '_1_Relu')(x)
+	x = layers.Activation('elu', name=name + '_1_elu')(x)
 
 	x = layers.Conv2D(
 		filters2, kernel_size, padding='SAME', name=name + '_2_Conv')(x)
 	x = layers.BatchNormalization(
 		axis=batch_axis, epsilon=1.001e-5, name=name + '_2_BN')(x)
-	x = layers.Activation('relu', name=name + '_2_Relu')(x)
+	x = layers.Activation('elu', name=name + '_2_elu')(x)
 
 	x = layers.Conv2D(filters3, 1, name=name + '_3_Conv')(x)
 	x = layers.BatchNormalization(
@@ -66,7 +65,7 @@ def residual_block_v1(x, filters, kernel_size=3, stride=1, conv_shortcut=True,
 		x = select_attention(x, filters3, block_name=attention, layer_name=name)
 
 	x = layers.Add(name=name + '_Add')([shortcut, x])
-	x = layers.Activation('relu', name=name + '_Output')(x)
+	x = layers.Activation('elu', name=name + '_Output')(x)
 
 	return x
 
@@ -113,7 +112,7 @@ def residual_block_v2(x, filters, kernel_size=3, stride=1,
 	# ResNetV2 uses pre-activation which makes it perform better on deeper networks
 	pre_activation = layers.BatchNormalization(
 		axis=batch_axis, epsilon=1.001e-5, name=name + '_Pre-Activation_BN')(x)
-	pre_activation = layers.Activation('relu', name=name + '_Pre-Activation_Relu')(pre_activation)
+	pre_activation = layers.Activation('elu', name=name + '_Pre-Activation_elu')(pre_activation)
 
 	if conv_shortcut:
 		shortcut = layers.Conv2D(
@@ -125,14 +124,14 @@ def residual_block_v2(x, filters, kernel_size=3, stride=1,
 					  name=name + '_1_Conv')(pre_activation)
 	x = layers.BatchNormalization(
 		axis=batch_axis, epsilon=1.001e-5, name=name + '_1_BN')(x)
-	x = layers.Activation('relu', name=name + '_1_Relu')(x)
+	x = layers.Activation('elu', name=name + '_1_elu')(x)
 
 	x = layers.ZeroPadding2D(padding=((1, 1), (1, 1)), name=name + '_2_Pad')(x)
 	x = layers.Conv2D(filters2, kernel_size, strides=stride,
 					  use_bias=False, name=name + '_2_Conv')(x)
 	x = layers.BatchNormalization(
 		axis=batch_axis, epsilon=1.001e-5, name=name + '_2_BN')(x)
-	x = layers.Activation('relu', name=name + '_2_Relu')(x)
+	x = layers.Activation('elu', name=name + '_2_elu')(x)
 
 	x = layers.Conv2D(filters3, 1, name=name + '_3_Conv')(x)
 

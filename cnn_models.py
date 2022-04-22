@@ -18,21 +18,21 @@ def gpu_check():
 	print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
 
 
-def data_augmentation(input_img):
-	input_img = layers.RandomFlip("horizontal")(input_img)
-	input_img = layers.RandomRotation(0.2)(input_img)
-	input_img = layers.RandomZoom(0.2)(input_img)
-	# input_img = layers.RandomHeight(0.2)(input_img)
-	# input_img = layers.RandomWidth(0.2)(input_img)
-	input_img = layers.RandomContrast(0.3)(input_img)
-	# value_range is between 0.0 and 1.0 if image  has been rescaled otherwise 0 to 255
-	# input_img = layers.RandomBrightness(factor=0.3, value_range=(0.0, 1.0))(input_img)
-	return input_img
+# def data_augmentation(input_img):
+# 	input_img = layers.RandomFlip("horizontal")(input_img)
+# 	input_img = layers.RandomRotation(0.2)(input_img)
+# 	input_img = layers.RandomZoom(0.2)(input_img)
+# 	# input_img = layers.RandomHeight(0.2)(input_img)
+# 	# input_img = layers.RandomWidth(0.2)(input_img)
+# 	input_img = layers.RandomContrast(0.3)(input_img)
+# 	# value_range is between 0.0 and 1.0 if image  has been rescaled otherwise 0 to 255
+# 	# input_img = layers.RandomBrightness(factor=0.3, value_range=(0.0, 1.0))(input_img)
+# 	return input_img
 
 
 def model_vgg16(img_height=48,
 				img_width=48,
-				a_hidden='relu',  # Hidden activation
+				a_hidden='elu',  # Hidden activation
 				a_output='softmax',  # Output activation
 				attention="",
 				num_classes=7
@@ -110,7 +110,7 @@ def model_vgg16(img_height=48,
 
 def model_vgg19(img_height=48,
 				img_width=48,
-				a_hidden='relu',  # Hidden activation
+				a_hidden='elu',  # Hidden activation
 				a_output='softmax',  # Output activation
 				attention="",
 				num_classes=7):
@@ -223,7 +223,7 @@ def model_ResNet_V1(
 		num_blocks = [3, 8, 36, 3]
 
 	# Data Augmentation
-	input_img = data_augmentation(input_img)
+	# input_img = data_augmentation(input_img)
 
 	# Conv_1
 	x = layers.ZeroPadding2D(padding=((3, 3), (3, 3)), name='Conv1_Pad')(input_img)

@@ -87,8 +87,6 @@ def model_vgg16(img_height=48,
 			attention_output = ECA_Net_block(x, kernel_size=3, name="Conv_Last_ECANet_")
 		if attention == "CBAM":
 			attention_output = CBAM_block(x, 512, reduction_ratio=32, kernel_size=7, name="Conv_Last_CBAM_")
-		if attention == "BAM":
-			attention_output = BAM_block(x, 512, 32, 2, name="Conv_Last_BAM_")
 
 		x = layers.Add(name='ConvLast_Add1')([attention_output, x])
 
@@ -148,6 +146,7 @@ def model_vgg19(img_height=48,
 	x = Conv2D(filters=512, kernel_size=3, padding='same', activation=a_hidden, name="Conv4.1")(x)
 	x = Conv2D(filters=512, kernel_size=3, padding='same', activation=a_hidden, name="Conv4.2")(x)
 	x = Conv2D(filters=512, kernel_size=3, padding='same', activation=a_hidden, name="Conv4.3")(x)
+	x = Conv2D(filters=512, kernel_size=3, padding='same', activation=a_hidden, name="Conv4.4")(x)
 	x = MaxPool2D(pool_size=2, strides=2, padding='same', name="MaxPool2D_4")(x)
 
 	# 5th Conv block
@@ -166,8 +165,6 @@ def model_vgg19(img_height=48,
 			attention_output = ECA_Net_block(x, kernel_size=3, name="Conv_Last_ECANet_")
 		if attention == "CBAM":
 			attention_output = CBAM_block(x, 512, reduction_ratio=32, kernel_size=7, name="Conv_Last_CBAM_")
-		if attention == "BAM":
-			attention_output = BAM_block(x, 512, 32, 2, name="Conv_Last_BAM_")
 
 		x = layers.Add(name='ConvLast_Add1')([attention_output, x])
 

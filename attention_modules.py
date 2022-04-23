@@ -41,6 +41,7 @@ def ECA_Net_block(input_layer, kernel_size=3, adaptive=False, name=None):
     Args:
       input_layer: input tensor
       kernel_size: integer, default: 3, size of the kernel for the convolution
+      adaptive: bool, default false , set kernel size depending on the number of input channels
       name: string, block label
     Returns:
       Output A tensor for the ECA-Net attention block
@@ -76,7 +77,8 @@ def CBAM_block(input_layer, filter_num, reduction_ratio=32, kernel_size=7, name=
     Args:
       input_layer: input tensor
       filter_num: integer, number of neurons in the hidden layers
-      reduction_ratio: integer, default: 32,reduction ratio for the number of neurons in the hidden layers
+      reduction_ratio: integer, default 32,reduction ratio for the number of neurons in the hidden layers
+      kernel_size: integer, default 7, kernel size of the spatial convolution excitation convolution
       name: string, block label
     Returns:
       Output A tensor for the CBAM attention block

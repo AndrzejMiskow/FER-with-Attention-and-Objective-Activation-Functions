@@ -82,11 +82,11 @@ def model_vgg16(img_height=48,
 		x = x
 	else:
 		if attention == "SEnet":
-			attention_output = squeeze_excitation_block(x, 512, 32.0, name="Conv_Last_SNE_")
+			attention_output = squeeze_excitation_block(x, 512, 16.0, name="Conv_Last_SNE_")
 		if attention == "ECANet":
-			attention_output = ECA_Net_block(x, kernel_size=3, name="Conv_Last_ECANet_")
+			attention_output = ECA_Net_block(x, adaptive=True, name="Conv_Last_ECANet_")
 		if attention == "CBAM":
-			attention_output = CBAM_block(x, 512, reduction_ratio=32, kernel_size=7, name="Conv_Last_CBAM_")
+			attention_output = CBAM_block(x, 512, reduction_ratio=16, kernel_size=7, name="Conv_Last_CBAM_")
 
 		x = layers.Add(name='ConvLast_Add1')([attention_output, x])
 
@@ -160,11 +160,11 @@ def model_vgg19(img_height=48,
 		x = x
 	else:
 		if attention == "SEnet":
-			attention_output = squeeze_excitation_block(x, 512, 32.0, name="Conv_Last_SNE_")
+			attention_output = squeeze_excitation_block(x, 512, 16.0, name="Conv_Last_SNE_")
 		if attention == "ECANet":
-			attention_output = ECA_Net_block(x, kernel_size=3, name="Conv_Last_ECANet_")
+			attention_output = ECA_Net_block(x, adaptive=True, name="Conv_Last_ECANet_")
 		if attention == "CBAM":
-			attention_output = CBAM_block(x, 512, reduction_ratio=32, kernel_size=7, name="Conv_Last_CBAM_")
+			attention_output = CBAM_block(x, 512, reduction_ratio=16, kernel_size=7, name="Conv_Last_CBAM_")
 
 		x = layers.Add(name='ConvLast_Add1')([attention_output, x])
 
@@ -321,29 +321,3 @@ def model_ResNet_V2(
 	return model
 
 
-def test_attention(
-		img_height=48,
-		img_width=48,
-		a_output='softmax',
-		pooling='avg',
-		grayscale=True,
-		num_classes=7):
-	if grayscale:
-		input_img = Input(shape=(img_height, img_width, 1), name="img")
-	else:
-		input_img = Input(shape=(img_height, img_width, 3), name="img")
-		input_img = layers.experimental.preprocessing.Rescaling(1. / 255)(input_img)
-
-	x = BAM_block(input_img, filter_num=48 * 3, reduction_ratio=4, dilution_conv=2, name="BAM")
-
-	# Output
-	if pooling == 'avg':
-		x = layers.GlobalAveragePooling2D(name='AvgPool2D_Final')(x)
-	else:
-		x = layers.GlobalMaxPooling2D(name='MaxPool2D_Final')(x)
-
-	output = layers.Dense(num_classes, activation=a_output, name='DenseFinal')(x)
-
-	model = Model(inputs=input_img, outputs=output, name="BAM")
-
-	return model

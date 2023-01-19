@@ -14,16 +14,16 @@ This paper uses state-of-the-art facial detector built on top of YOLO framework 
 
 YOLO [Refrence YOLO] architecture was chosen due to its efficient one-stage object detection capability that is comparable to the performances of a two-stage detectors whilst offering significantly better computational performance.
 
-![YOLO 5 Face Output](docs\images\Yolo5Face_Output.png)
+![YOLO 5 Face Output](https://github.com/AndrzejMiskow/FER-with-Attention-and-Objective-Activation-Functions/blob/main/docs/images/Yolo5Face_Output.png)
 
 ## CNN Models
 ### VGGNet
-![VGGNet Architecture](docs\images\VGGNet_Architecture.png)
+![VGGNet Architecture](https://github.com/AndrzejMiskow/FER-with-Attention-and-Objective-Activation-Functions/blob/main/docs/images/VGGNet_Architecture.png)
 
-Authors in [VGGNet refrence] proposed the Visual Geometry Group Network (VGGNet) architecture. VGGNet showed that it is possible to increase the depth of a CNN through small-sized kernels. VGGNet showed significant improvement over prior architecture by increasing the depth of the network to 16–19 layers. 
+Authors in proposed the Visual Geometry Group Network (VGGNet) architecture. VGGNet showed that it is possible to increase the depth of a CNN through small-sized kernels. VGGNet showed significant improvement over prior architecture by increasing the depth of the network to 16–19 layers. 
 
 ### ResNet V1
-![ResNet Architecture](docs\images\ResNet_Architecture.png)
+![ResNet Architecture](https://github.com/AndrzejMiskow/FER-with-Attention-and-Objective-Activation-Functions/blob/main/docs/images/ResNet_Architecture.png)
 
 Authors in devised the ResNet architecture, which introduced the concept of residual learning and proposed their computational block, the “residual” block. ResNet aimed at solving the issues found in deep CNN architectures: the vanishing gradient and the degradation problem.
 

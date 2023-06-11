@@ -4,7 +4,7 @@ This projected explored the effect of introducing channel and spatial attention 
 
 The project displayed that not only attention can significantly improve the performance of these models, but also that combining them with a different activation function can further help increase the performance of these models.
 
-Paper for this project was published in the The 29th International Conference on Neural Information Processing (ICONIP 2022) [Paper Link](https://link.springer.com/chapter/10.1007/978-981-99-1642-9_43) [Original Disertation](docs\documents\Final-Disertation-Andrzej-Miskow.pdf) 
+Paper for this project was published in the The 29th International Conference on Neural Information Processing (ICONIP 2022) [Paper Link](https://link.springer.com/chapter/10.1007/978-981-99-1642-9_43) [Original Disertation](docs/documents/Final-Disertation-Andrzej-Miskow.pdf) 
 
 # Development
 

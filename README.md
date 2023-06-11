@@ -4,7 +4,7 @@ This projected explored the effect of introducing channel and spatial attention 
 
 The project displayed that not only attention can significantly improve the performance of these models, but also that combining them with a different activation function can further help increase the performance of these models.
 
-Paper for this project was published in the The 29th International Conference on Neural Information Processing (ICONIP 2022) [Paper Link](https://link.springer.com/chapter/10.1007/978-981-99-1642-9_43)
+Paper for this project was published in the The 29th International Conference on Neural Information Processing (ICONIP 2022) [Paper Link](https://link.springer.com/chapter/10.1007/978-981-99-1642-9_43) [Original Disertation](docs\documents\Final-Disertation-Andrzej-Miskow.pdf) 
 
 # Development
 
@@ -29,6 +29,25 @@ Authors in devised the ResNet architecture, which introduced the concept of resi
 
 ### ResNet V2
 After the release of ResNet, it was discovered that the degradation problem was still present when the depth of the network exceeded 200 layers. The degradation problem inspired the development of ResNet V2, which fully solved the issue of both the vanishing gradient and the degradation problem by implementing pre-activations in the residual blocks. The new version of ResNet increased accuracy for ultra-deep networks exceeding  1001 layers.
+
+## Attention Modules
+### SEN-Net
+SENet (Squeeze-and-Excitation Network) incorporates a channel-wise attention mechanism into CNNs to recalibrate channel-wise feature responses adaptively. It introduces two additional operations called "squeeze" and "excitation." The squeeze operation aggregates spatial information globally, and the excitation operation models the interdependencies between channels. By explicitly emphasizing informative channels and suppressing less important ones, SENet enables CNNs to focus on more discriminative features.
+
+![SEN-Net](docs\images\SEN-Net.jpg)
+
+### ECA-Net
+ECA-Net (Efficient Channel Attention Network) introduces the "Efficient Channel Attention" module, which aims to capture channel-wise dependencies effectively while minimizing computational overhead. It utilizes a 1D convolutional kernel to model the interdependencies between channels. By adaptively recalibrating channel-wise feature responses, ECA-Net can enhance the discriminative power of CNNs.
+
+![SEN-Net](docs\images\ECA-net.jpg)
+
+### CBAM
+
+![CBAM-Module](docs\images\CBAM-Module.png)
+
+CBAM (Convolutional Block Attention Module is a versatile attention module that combines both spatial and channel attention mechanisms. It includes two branches: one for spatial attention and the other for channel attention. The spatial attention branch captures the interdependencies between spatial locations within a feature map, while the channel attention branch models the interdependencies between channels. By adaptively attending to relevant spatial locations and informative channels, CBAM enhances the representational power of CNNs.
+
+![CBAM-Blocks](docs\images\CBAM-Blcoks.gif)
 
 # Results
 ## FER Datasets
@@ -85,6 +104,14 @@ Project was evaluted over 3 datasets of diffrent sizes. The small JAFFA dataset 
 | ResNetV2-152 + ECA-Net | 58.57M | 89.82\% | 73.33\% | 61.54\% |
 | ResNetV2-152 + CBAM | **64.69M** | **90.11\%** | **77.78\%** | **62.05\%** |
 
+# Conclusions
+This project aimed to classify the seven basic human emotions using deep learning models. The project focused on implementing and modifying popular CNN models such as VGGNet, ResNet, and ResNetV2. By replacing the internal activation function with ELU, the models effectively addressed the bias-shift problem and improved their performance.
+
+The project also explored the concept of attention to refine extracted features and enhance model generalization. Three attention modules, SEN-Net, ECA-Net, and CBAM, were implemented to improve the CNNs' performance. SEN-Net and ECA-Net focused on channel attention, while CBAM utilized both channel and spatial attention. It was observed that CBAM achieved the most significant performance improvement, benefiting from attention in both aspects.
+
+To verify the impact of attention on CNN performance, extensive experiments were conducted on three datasets of different sizes: CK+, JAFFE, and FER2013. Results demonstrated that each attention module outperformed the baseline models on all datasets, showcasing the generalization improvement. Notably, CBAM consistently achieved the best performance across all experiments. Overall, attention modules improved the baseline models by 1.65% for CK+, 6.55% for JAFFE, and 3.15% for FER2013, achieving accuracies of 92.31%, 84.44%, and 64.07%, respectively. The accuracy achieved on FER2013 even matched human performance.
+
+In conclusion, this project successfully demonstrated the effectiveness of attention modules in enhancing the performance of CNNs for emotion recognition tasks. The findings highlight the importance of attention in refining feature representation and improving generalization across datasets of various sizes. By combining deep learning models with attention mechanisms, significant performance gains can be achieved in emotion recognition applications.
 
 # Refrences
 - YOLO

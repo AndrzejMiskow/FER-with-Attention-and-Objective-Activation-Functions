@@ -1,11 +1,11 @@
 # Emotion Recognition with Facial Attention and Objective Activation Functions
 
-# Introduction
 This projected explored the effect of introducing channel and spatial attention mechanisms, namely  SEN-Net, ECA-Net, and CBAM to existing CNN vision-based models such as VGGNet, ResNet, and ResNetV2 to perform the Facial Emotion Recognition task. 
 
 The project displayed that not only attention can significantly improve the performance of these models, but also that combining them with a different activation function can further help increase the performance of these models.
 
-Paper for this project was published in the The 29th International Conference on Neural Information Processing (ICONIP 2022) [Certificate](https://credsverse.com/credentials/4224f5fe-4adf-40ea-93b4-da04dee81a45)
+Paper for this project was published in the The 29th International Conference on Neural Information Processing (ICONIP 2022) [Paper Link](https://link.springer.com/chapter/10.1007/978-981-99-1642-9_43)
+
 # Development
 
 ## Pre-Processing
@@ -29,20 +29,6 @@ Authors in devised the ResNet architecture, which introduced the concept of resi
 
 ### ResNet V2
 After the release of ResNet, it was discovered that the degradation problem was still present when the depth of the network exceeded 200 layers. The degradation problem inspired the development of ResNet V2, which fully solved the issue of both the vanishing gradient and the degradation problem by implementing pre-activations in the residual blocks. The new version of ResNet increased accuracy for ultra-deep networks exceeding  1001 layers.
-
-
-## Activation Functions 
-RELU activation function was utilised in the original architectures of VGGNet, ResNet and ResNetV2 as it solved the issue of vaninshing gradient. Overtime reserachers found that RELU also had an bias-shift issue caused by RELU's mean activation being larger than zero. ELU and SELU were developed to solve these issues.
-### RELU
-$$
-\operatorname{ReLU}(x)= \begin{cases}x & \text { if } x>0 \\ 0 & \text { if } x \leq 0\end{cases}
-$$
-### ELU
-$$E L U(x)= \begin{cases}x & \text { if } x>0 \\ \alpha(\exp (x)-1) & \text { if } x \leq 0\end{cases}$$
-### SELU
-$$
-\operatorname{SELU}(x)=\lambda \begin{cases}x & \text { if } x>0 \\ \alpha e^x-\alpha & \text { if } x \leqslant 0\end{cases}
-$$
 
 # Results
 ## FER Datasets

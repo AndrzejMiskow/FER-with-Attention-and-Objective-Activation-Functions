@@ -34,20 +34,20 @@ After the release of ResNet, it was discovered that the degradation problem was 
 ### SEN-Net
 SENet (Squeeze-and-Excitation Network) incorporates a channel-wise attention mechanism into CNNs to recalibrate channel-wise feature responses adaptively. It introduces two additional operations called "squeeze" and "excitation." The squeeze operation aggregates spatial information globally, and the excitation operation models the interdependencies between channels. By explicitly emphasizing informative channels and suppressing less important ones, SENet enables CNNs to focus on more discriminative features.
 
-![SEN-Net](docs\images\SEN-Net.jpg)
+![SEN-Net](docs/images/SEN-Net.jpg)
 
 ### ECA-Net
 ECA-Net (Efficient Channel Attention Network) introduces the "Efficient Channel Attention" module, which aims to capture channel-wise dependencies effectively while minimizing computational overhead. It utilizes a 1D convolutional kernel to model the interdependencies between channels. By adaptively recalibrating channel-wise feature responses, ECA-Net can enhance the discriminative power of CNNs.
 
-![SEN-Net](docs\images\ECA-net.jpg)
+![SEN-Net](docs/images/ECA-net.jpg)
 
 ### CBAM
 
-![CBAM-Module](docs\images\CBAM-Module.png)
+![CBAM-Module](docs/images/CBAM-Module.png)
 
 CBAM (Convolutional Block Attention Module is a versatile attention module that combines both spatial and channel attention mechanisms. It includes two branches: one for spatial attention and the other for channel attention. The spatial attention branch captures the interdependencies between spatial locations within a feature map, while the channel attention branch models the interdependencies between channels. By adaptively attending to relevant spatial locations and informative channels, CBAM enhances the representational power of CNNs.
 
-![CBAM-Blocks](docs\images\CBAM-Blcoks.gif)
+![CBAM-Blocks](docs/images/CBAM-Blcoks.gif)
 
 # Results
 ## FER Datasets
